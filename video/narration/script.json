@@ -1,0 +1,29 @@
+{
+ "langs": ["fr"],
+ "engine": "kokoro",
+ "voices": {"kokoro": {"fr": {"voice": "ff_siwis", "lang": "fr-fr", "speed": 1.1}}},
+ "scenes": [
+  {"id": "accroche", "min": 4, "lead": 0.4, "tail": 0.5,
+   "fr": ["Tu peux doubler ton salaire demain…", "mais tu dois prendre la place de ton meilleur ami."]},
+  {"id": "ami-vire", "min": 6, "lead": 0.4, "tail": 0.5,
+   "fr": ["Ton meilleur ami vient de se faire virer.", "Vous travaillez ensemble depuis cinq ans.",
+          "C'est lui qui t'a fait entrer dans l'entreprise.",
+          "Quand tu n'avais rien, il t'a même hébergé gratuitement pendant trois mois."]},
+  {"id": "offre", "min": 6, "lead": 0.4, "tail": 0.5,
+   "fr": ["Mais aujourd'hui, ton patron t'appelle dans son bureau.",
+          "Il te propose de récupérer son poste, avec un salaire deux fois plus élevé que le tien.",
+          "Tu pourrais enfin rembourser tes dettes, aider ta famille et changer de vie."]},
+  {"id": "appel", "min": 6, "lead": 0.4, "tail": 0.5,
+   "fr": ["Sauf qu'une heure plus tard, ton meilleur ami t'appelle.",
+          "Il te dit : « Frère, je suis au fond du trou. Heureusement que je peux compter sur toi. »"]},
+  {"id": "minuit", "min": 4, "lead": 0.3, "tail": 0.5,
+   "fr": ["Et là, ton patron t'envoie un message :",
+          "« Tu as jusqu'à minuit pour accepter. Sinon, le poste va à quelqu'un d'autre. »"]},
+  {"id": "choix", "min": 12, "lead": 0.4, "tail": 1.5,
+   "fr": ["A : tu acceptes. C'est une chance qui ne se représentera peut-être jamais.",
+          "B : tu refuses. Tu ne peux pas faire ça à celui qui t'a toujours aidé.",
+          "Tu as cinq secondes pour choisir. A ou B ?",
+          "Écris ta lettre en commentaire. Et surtout, explique pourquoi.",
+          "Maintenant, tu tranches !"]}
+ ]
+}

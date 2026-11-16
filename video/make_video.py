@@ -2,8 +2,9 @@
 """Génère la vidéo « TU TRANCHES ? » (1080x1920, 60 s) à partir des 5 images.
 
 Usage : python3 make_video.py   ->  tu_tranches.mp4
-Dépendances : Pillow, numpy, ffmpeg.
+La voix et le timing viennent de narration/ (Kokoro, skill canvas-video :\nuv run --with kokoro-onnx --with soundfile narrate.py video/narration).\nDépendances : Pillow, numpy, ffmpeg.
 """
+import json
 import math
 import os
 import subprocess
@@ -15,7 +16,12 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 IMG = os.path.join(HERE, "images")
 OUT = os.path.join(HERE, "tu_tranches.mp4")
-W, H, FPS, DUR = 1080, 1920, 30, 60.0
+NARR = os.path.join(HERE, "narration")
+TIMING = json.loads(open(os.path.join(NARR, "timing.js"), encoding="utf-8").read()
+                    .split("window.VIDEO_TIMING = ", 1)[1].rstrip().rstrip(";"))["fr"]
+VOICE = os.path.join(NARR, "audio", "fr.m4a")
+W, H, FPS = 1080, 1920, 30
+DUR = TIMING["duration"]
 SR = 44100
 
 BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -39,50 +45,46 @@ def load(name):
 
 
 # --------------------------------------------------------------------------
-# Scènes : (fichier, début, fin, mouvement caméra, position des sous-titres)
-# mouvement : (zoom_début, zoom_fin, cx_début, cy_début, cx_fin, cy_fin)
-#   cx/cy = centre du cadrage en fraction de l'image
+# Image et mouvement de caméra de chaque scène (les temps viennent de la voix)
+# cam = (zoom_début, zoom_fin, cx_début, cy_début, cx_fin, cy_fin)
 # --------------------------------------------------------------------------
-SCENES = [
-    # 1. Accroche : il fixe l'écran « SALAIRE x2 » en pensant à son ami
-    dict(img="1_reflexion_salaire.png", t0=0.0, t1=7.0,
-         cam=(1.30, 1.05, 0.70, 0.55, 0.50, 0.50), shake=0),
-    # 2. Le meilleur ami vient de se faire virer
-    dict(img="2_ami_vire.png", t0=7.0, t1=19.0,
-         cam=(1.0, 1.18, 0.50, 0.50, 0.38, 0.55), shake=0),
-    # 3. Le patron propose le poste, salaire doublé
-    dict(img="3_offre_patron.png", t0=19.0, t1=31.0,
-         cam=(1.0, 1.25, 0.50, 0.55, 0.55, 0.68), shake=0),
-    # 4. Une heure plus tard, l'ami appelle
-    dict(img="4_appel_ami.png", t0=31.0, t1=41.0,
-         cam=(1.0, 1.20, 0.50, 0.55, 0.62, 0.55), shake=1),
-    # 5. Message du patron : jusqu'à minuit
-    dict(img="1_reflexion_salaire.png", t0=41.0, t1=47.0,
-         cam=(1.05, 1.45, 0.50, 0.50, 0.68, 0.55), shake=0),
-    # 6. Le choix A ou B
-    dict(img="5_tu_tranches.png", t0=47.0, t1=60.0,
-         cam=(1.45, 1.0, 0.50, 0.17, 0.50, 0.50), shake=0),
-]
+LOOK = {
+    "accroche": dict(img="1_reflexion_salaire.png", cam=(1.30, 1.05, 0.70, 0.55, 0.50, 0.50), shake=0),
+    "ami-vire": dict(img="2_ami_vire.png", cam=(1.0, 1.18, 0.50, 0.50, 0.38, 0.55), shake=0),
+    "offre":    dict(img="3_offre_patron.png", cam=(1.0, 1.25, 0.50, 0.55, 0.55, 0.68), shake=0),
+    "appel":    dict(img="4_appel_ami.png", cam=(1.0, 1.20, 0.50, 0.55, 0.62, 0.55), shake=1),
+    "minuit":   dict(img="1_reflexion_salaire.png", cam=(1.05, 1.45, 0.50, 0.50, 0.68, 0.55), shake=0),
+    "choix":    dict(img="5_tu_tranches.png", cam=(1.45, 1.0, 0.50, 0.17, 0.50, 0.50), shake=0),
+}
+SCENES, CUES = [], {}
+for s in TIMING["scenes"]:
+    SCENES.append(dict(LOOK[s["id"]], id=s["id"], t0=s["start"], t1=s["start"] + s["d"]))
+    CUES[s["id"]] = [(s["start"] + c["s"], s["start"] + c["e"], c["text"]) for c in s["cues"]]
 XFADE = 0.45
 
-# Sous-titres : (début, fin, texte, mots surlignés -> couleur, position)
-CAPS = [
-    (0.3, 6.8, "Tu peux doubler ton salaire demain…", {"doubler": GREEN, "salaire": GREEN}, "top"),
-    (2.6, 6.8, "…mais tu dois prendre la place de ton meilleur ami.", {"meilleur": RED, "ami.": RED}, "top2"),
+# Mots surlignés
+HL = {"doubler": GREEN, "salaire": GREEN, "meilleur": RED, "ami.": RED, "ami": RED, "virer.": RED,
+      "cinq": RED, "ans.": RED, "gratuitement": GREEN, "patron": RED, "deux": GREEN, "fois": GREEN,
+      "élevé": GREEN, "changer": GREEN, "vie.": GREEN, "compter": RED, "toi.": RED, "»": RED,
+      "A": GREEN, "acceptes.": GREEN, "B": RED, "refuses.": RED, "commentaire.": GREEN, "pourquoi.": GREEN}
 
-    (7.3, 10.2, "Ton meilleur ami vient de se faire virer.", {"virer.": RED}, "top"),
-    (10.2, 12.9, "Vous travaillez ensemble depuis 5 ans.", {"5": RED, "ans.": RED}, "top"),
-    (12.9, 15.9, "C'est lui qui t'a fait entrer dans l'entreprise.", {}, "top"),
-    (15.9, 18.9, "Quand tu n'avais rien, il t'a hébergé gratuitement 3 mois.", {"gratuitement": GREEN}, "top"),
+# Sous-titres : chaque phrase reste affichée jusqu'à la suivante
+CAPS = []
+for sc in SCENES:
+    cues = CUES[sc["id"]]
+    for i, (s, e, text) in enumerate(cues):
+        if sc["id"] == "minuit" and i == 1:
+            continue  # le SMS à l'écran affiche déjà la phrase
+        if sc["id"] == "choix" and i == len(cues) - 1:
+            continue  # « Maintenant, tu tranches ! » = carton final
+        end = cues[i + 1][0] if i + 1 < len(cues) else sc["t1"] - 0.1
+        pos = "bottom" if sc["id"] == "choix" else "top"
+        CAPS.append((s - 0.05, end - 0.05, text.replace(" :", "\u00a0:"), e - s, pos))
 
-    (19.3, 22.4, "Aujourd'hui, ton patron t'appelle dans son bureau.", {"patron": RED}, "top"),
-    (22.4, 25.6, "Il te propose son poste… avec un salaire x2.", {"x2.": GREEN, "salaire": GREEN}, "top"),
-    (25.6, 30.9, "Rembourser tes dettes. Aider ta famille. Changer de vie.", {"Changer": GREEN, "de": GREEN, "vie.": GREEN}, "top"),
-
-    (31.3, 34.4, "Une heure plus tard… ton meilleur ami t'appelle.", {"ami": RED}, "top"),
-    (34.4, 40.9, "« Frère, je suis au fond du trou. Heureusement que je peux compter sur toi. »", {"compter": RED, "sur": RED, "toi.": RED}, "top"),
-
-]
+T_X2 = CUES["offre"][1][0] + 2.4                      # « …deux fois plus élevé… »
+T_SMS = (CUES["minuit"][0][1] - 0.6, SCENES[4]["t1"] - 0.1)
+T_COUNT = CUES["choix"][2][0]                          # « Tu as cinq secondes… »
+T_FINAL = max(T_COUNT + 5, CUES["choix"][-1][0] - 0.3)
 
 
 def wrap(draw, text, fnt, maxw):
@@ -99,7 +101,8 @@ def wrap(draw, text, fnt, maxw):
     return lines
 
 
-def draw_caption(frame, t, start, end, text, hl, pos):
+def draw_caption(frame, t, start, end, text, speak, pos):
+    hl = HL
     if not (start <= t <= end):
         return
     a_in = ease((t - start) / 0.35)
@@ -111,9 +114,7 @@ def draw_caption(frame, t, start, end, text, hl, pos):
     lines = wrap(d, text, fnt, W - 200)
     lh = 78
     box_h = lh * len(lines) + 60
-    y0 = {"top": 150, "top2": 150, "bottom": H - box_h - 170}[pos]
-    if pos == "top2":
-        y0 = 150 + 3 * lh + 70
+    y0 = {"top": 150, "bottom": H - box_h - 150}[pos]
     y0 += int((1 - a_in) * 40)  # glisse vers le haut en apparaissant
     box_w = max(d.textlength(" ".join(l), font=fnt) for l in lines) + 80
     x0 = (W - box_w) / 2
@@ -122,14 +123,14 @@ def draw_caption(frame, t, start, end, text, hl, pos):
                         outline=(0, 0, 0, 255), width=6)
     # mots révélés progressivement (effet « karaoké »)
     nwords = sum(len(l) for l in lines)
-    shown = int(1 + (t - start) / 0.08)
+    shown = int(1 + nwords * (t - start) / max(0.5, speak * 0.9))
     k = 0
     for i, l in enumerate(lines):
         lw = d.textlength(" ".join(l), font=fnt)
         x = (W - lw) / 2
         y = y0 + 30 + i * lh
         for w in l:
-            col = hl.get(w, (15, 15, 15))
+            col = hl.get(w, hl.get(w.rstrip(",.?!…"), (15, 15, 15)))
             if k < shown or k >= nwords:
                 d.text((x, y), w, font=fnt, fill=col + (255,))
             k += 1
@@ -160,7 +161,7 @@ def camera(src, t, sc):
 
 def sms_bubble(frame, t):
     """Notification du patron (scène 5)."""
-    s, e = 41.4, 46.9
+    s, e = T_SMS
     if not (s <= t <= e):
         return
     p = ease((t - s) / 0.4)
@@ -180,10 +181,10 @@ def sms_bubble(frame, t):
         col = RED if "minuit" in txt else (20, 20, 20)
         d.text((100, y + 160 + i * 66), txt, font=fnt, fill=col + (255,))
     # horloge qui tourne
-    if t > 43:
+    if t > s + 1.2:
         cx, cy, r = W // 2, H - 360, 130
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255, 240), outline=(0, 0, 0, 255), width=10)
-        ang = (t - 43) * 2.4
+        ang = (t - s) * 2.4
         d.line([cx, cy, cx + 0.8 * r * math.sin(ang), cy - 0.8 * r * math.cos(ang)], fill=RED + (255,), width=10)
         d.line([cx, cy, cx, cy - 0.55 * r], fill=(0, 0, 0, 255), width=12)
         d.text((cx, cy + r + 50), "00:00", font=font(64), fill=RED + (255,), anchor="mm",
@@ -197,19 +198,19 @@ def countdown(frame, t):
     """Compte à rebours 5..1 puis appel à commenter (scène 6)."""
     layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-    if 51.2 <= t < 56.2:
-        n = 5 - int(t - 51.2)
-        f = (t - 51.2) % 1.0
+    if T_COUNT <= t < T_COUNT + 5:
+        n = 5 - int(t - T_COUNT)
+        f = (t - T_COUNT) % 1.0
         sc = 1.6 - 0.6 * ease(f / 0.25)
         a = int(255 * (1 - max(0, f - 0.75) / 0.25))
         r = int(170 * sc)
-        cx, cy = W // 2, H // 2 + 60
+        cx, cy = W // 2, H // 2 - 120
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(0, 0, 0, int(a * 0.92)), outline=(255, 255, 255, a), width=10)
         d.arc([cx - r + 18, cy - r + 18, cx + r - 18, cy + r - 18], -90, -90 + 360 * (1 - f), fill=RED + (a,), width=14)
         d.text((cx, cy), str(n), font=font(int(190 * sc)), fill=(255, 255, 255, a), anchor="mm")
-    if t >= 56.2:
-        p = ease((t - 56.2) / 0.4)
-        pulse = 1 + 0.04 * math.sin((t - 56.2) * 8)
+    if t >= T_FINAL:
+        p = ease((t - T_FINAL) / 0.4)
+        pulse = 1 + 0.04 * math.sin((t - T_FINAL) * 8)
         d.rectangle([0, 0, W, H], fill=(0, 0, 0, int(215 * p)))
         f1 = font(int(150 * pulse))
         cy = H // 2 - 220
@@ -232,7 +233,7 @@ def countdown(frame, t):
 
 def flash_x2(frame, t):
     """Gros « x2 » qui claque quand on annonce le salaire doublé."""
-    s, e = 22.6, 25.4
+    s, e = T_X2, T_X2 + 2.6
     if not (s <= t <= e):
         return
     f = t - s
@@ -257,8 +258,8 @@ def render_frame(t, images):
             base = Image.blend(base, fr, a)
     frame = base.convert("RGBA")
     # scène d'accroche : léger voile pour la lisibilité
-    if t < 7:
-        frame.alpha_composite(Image.new("RGBA", (W, H), (0, 0, 0, int(60 * (1 - ease((t - 5) / 2))))))
+    if t < SCENES[0]["t1"]:
+        frame.alpha_composite(Image.new("RGBA", (W, H), (0, 0, 0, 50)))
     for c in CAPS:
         draw_caption(frame, t, *c)
     flash_x2(frame, t)
@@ -271,97 +272,40 @@ def render_frame(t, images):
 
 
 # ------------------------------- Audio -------------------------------------
-def make_audio(path):
+def make_fx(path):
+    """Bruitages discrets uniquement : souffle léger entre les scènes + notification du SMS."""
     n = int(SR * DUR)
-    t = np.arange(n) / SR
     out = np.zeros(n)
-
-    def env(s, e, fade=0.5):
-        m = np.clip((t - s) / fade, 0, 1) * np.clip((e - t) / fade, 0, 1)
-        return m
-
-    # nappe grave et tendue (accord mineur), plus présente vers la fin
-    for f, g in ((55, 0.10), (65.4, 0.06), (82.4, 0.06), (110, 0.04)):
-        out += g * np.sin(2 * np.pi * f * t + 0.3 * np.sin(2 * np.pi * 0.2 * t)) * env(0, 60, 2)
-    out *= 0.7 + 0.5 * (t / DUR)
-
-    # « pulse » rythmique doux
-    beat = (np.sin(2 * np.pi * 1.5 * t) > 0.97).astype(float)
-    out += 0.05 * np.convolve(beat, np.exp(-np.arange(2000) / 300), "same") * np.sin(2 * np.pi * 220 * t)
 
     def add(sig, start):
         i = int(start * SR)
         out[i:i + len(sig)] += sig[: max(0, n - i)]
 
-    def whoosh(d=0.5):
-        k = np.arange(int(d * SR)) / SR
-        noise = np.random.default_rng(1).standard_normal(len(k))
-        noise = np.convolve(noise, np.ones(30) / 30, "same")
-        return 0.25 * noise * np.sin(np.pi * k / d) ** 2
-
+    d = 0.6
+    k = np.arange(int(d * SR)) / SR
+    noise = np.convolve(np.random.default_rng(1).standard_normal(len(k)), np.ones(60) / 60, "same")
+    whoosh = 0.05 * noise * np.sin(np.pi * k / d) ** 2
     for sc in SCENES[1:]:
-        add(whoosh(), sc["t0"] - 0.35)
-
-    def hit(f=60, d=0.8, g=0.5):
-        k = np.arange(int(d * SR)) / SR
-        return g * np.sin(2 * np.pi * f * k * (1 - 0.4 * k)) * np.exp(-k * 5)
-
-    add(hit(), 7.0)     # « viré »
-    add(hit(80, 0.6, 0.4), 22.6)  # x2
-    add(hit(), 47.0)
-
-    # pièces / caisse enregistreuse à la proposition
-    for i in range(6):
-        k = np.arange(int(0.12 * SR)) / SR
-        add(0.12 * np.sin(2 * np.pi * (2400 + 300 * i) * k) * np.exp(-k * 35), 22.7 + i * 0.07)
-
-    # sonnerie de téléphone
-    for r in range(3):
-        k = np.arange(int(0.9 * SR)) / SR
-        ring = 0.12 * (np.sin(2 * np.pi * 440 * k) + np.sin(2 * np.pi * 480 * k)) * (np.sin(2 * np.pi * 20 * k) > 0)
-        add(ring, 31.2 + r * 1.3)
-
-    # battements de cœur pendant l'appel
-    for b in np.arange(34.4, 40.8, 0.85):
-        for dt, g in ((0, 0.55), (0.18, 0.4)):
-            add(hit(45, 0.25, g), b + dt)
-
-    # notification SMS
+        add(whoosh, sc["t0"] - 0.4)
     for i, f in enumerate((1320, 1760)):
         k = np.arange(int(0.15 * SR)) / SR
-        add(0.2 * np.sin(2 * np.pi * f * k) * np.exp(-k * 12), 41.4 + i * 0.13)
-
-    # tic-tac de l'horloge
-    for b in np.arange(43, 46.9, 0.5):
-        k = np.arange(int(0.03 * SR)) / SR
-        add(0.25 * np.sin(2 * np.pi * (2000 if int(b * 2) % 2 else 1500) * k) * np.exp(-k * 150), b)
-
-    # compte à rebours
-    for i in range(5):
-        k = np.arange(int(0.25 * SR)) / SR
-        add(0.3 * np.sin(2 * np.pi * 880 * k) * np.exp(-k * 14), 51.2 + i)
-    k = np.arange(int(1.2 * SR)) / SR
-    add(0.35 * (np.sin(2 * np.pi * 523 * k) + np.sin(2 * np.pi * 659 * k) + np.sin(2 * np.pi * 784 * k)) / 3
-        * np.exp(-k * 2.5), 56.2)
-    add(hit(55, 1.0, 0.5), 56.2)
-
-    out *= np.clip(t / 0.5, 0, 1) * np.clip((DUR - t) / 1.0, 0, 1)
-    out = np.tanh(out * 1.4) * 0.8
-    pcm = (out * 32767).astype(np.int16)
-    stereo = np.stack([pcm, pcm], axis=1).ravel()
+        add(0.06 * np.sin(2 * np.pi * f * k) * np.exp(-k * 14), T_SMS[0] + 0.1 + i * 0.13)
+    pcm = (np.clip(out, -1, 1) * 32767).astype(np.int16)
     with wave.open(path, "wb") as w:
-        w.setnchannels(2)
+        w.setnchannels(1)
         w.setsampwidth(2)
         w.setframerate(SR)
-        w.writeframes(stereo.tobytes())
+        w.writeframes(pcm.tobytes())
 
 
 def main():
-    wav = os.path.join(HERE, "_audio.wav")
-    make_audio(wav)
+    wav = os.path.join(HERE, "_fx.wav")
+    make_fx(wav)
     images = {sc["img"]: load(sc["img"]) for sc in SCENES}
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
-           "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", wav,
+           "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", VOICE, "-i", wav,
+           "-filter_complex", "[1:a]volume=1.0[v];[2:a]volume=1.0[f];[v][f]amix=inputs=2:normalize=0,"
+           "aformat=channel_layouts=stereo[a]", "-map", "0:v", "-map", "[a]",
            "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",
            "-c:a", "aac", "-b:a", "160k", "-shortest", "-movflags", "+faststart", OUT]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)

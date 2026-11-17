@@ -1,0 +1,88 @@
+{
+ "langs": [
+  "fr"
+ ],
+ "engine": "kokoro",
+ "voices": {
+  "kokoro": {
+   "fr": {
+    "voice": "ff_siwis",
+    "lang": "fr-fr",
+    "speed": 1.18
+   }
+  }
+ },
+ "scenes": [
+  {
+   "id": "choc",
+   "min": 10,
+   "lead": 0.15,
+   "tail": 0.4,
+   "fr": [
+    "Imagine ! C'est le jour de ton mariage !",
+    "Mais au moment de dire OUI…",
+    {
+     "text": "tu réalises que tu ne veux plus te marier.",
+     "at": 4.4
+    }
+   ]
+  },
+  {
+   "id": "pression",
+   "min": 12,
+   "lead": 0.3,
+   "tail": 0.4,
+   "fr": [
+    "Toute ta famille est là. Tes amis aussi.",
+    "Des mois de préparation. Des milliers d'euros dépensés !",
+    "La personne en face de toi te regarde avec un immense sourire."
+   ]
+  },
+  {
+   "id": "doute",
+   "min": 13,
+   "lead": 0.3,
+   "tail": 0.4,
+   "fr": [
+    "Mais toi… tu ne ressens plus la même chose.",
+    "Tu ne sais pas si tu ne l'aimes plus…",
+    {
+     "text": "ou si tout est allé trop vite.",
+     "at": 4.9
+    },
+    {
+     "text": "Et là… elle prend l'alliance, et commence à la glisser à ton doigt !",
+     "at": 7.4
+    }
+   ]
+  },
+  {
+   "id": "ultimatum",
+   "min": 10,
+   "lead": 0.3,
+   "tail": 0.3,
+   "fr": [
+    "Tout le monde te regarde.",
+    "Le prêtre te pose LA question :",
+    "« Voulez-vous prendre cette personne pour époux ou épouse ? »",
+    {
+     "text": "Tu as quelques secondes pour répondre.",
+     "at": 8.2
+    }
+   ]
+  },
+  {
+   "id": "choix",
+   "min": 15,
+   "lead": 0.3,
+   "tail": 1.2,
+   "fr": [
+    "A : tu dis OUI. Tu gardes tes doutes pour toi, pour ne pas lui briser le cœur devant tout le monde.",
+    "B : tu dis NON. Tu avoues devant tous les invités que tes sentiments ont changé.",
+    "Alors, tu fais quoi ? A ou B ?",
+    "Écris ton choix en commentaire, et explique pourquoi !",
+    "TU TRANCHES !"
+   ]
+  }
+ ]
+}

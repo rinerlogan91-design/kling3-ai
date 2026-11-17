@@ -28,6 +28,13 @@ Propriétés communes à tous : `x`, `y`, `scale`, `rot`, `alpha`, `at`, `until`
 | `ghost` | false | contour seul, sans remplissage |
 | `ring` | true | anneau pointillé au sol |
 | `facing` | 1 | −1 pour le retourner |
+| `dress` | false | robe + voile + chignon (mariée, personnage féminin) |
+| `bowtie` | false | nœud papillon noir (marié, personnage habillé) |
+| `book` | false | livre ouvert tenu devant lui (officiant, professeur) |
+| `marks` | — | émotion au-dessus de la tête : `joy`, `shock`, `sweat`, `scribble` (confusion) — paliers possibles |
+| `shake` | 0 | tremblement en px (2–4 = nervosité) |
+
+Poses supplémentaires : `worry` (mains au visage), `refuse` (bras tendu, paume en avant), `give` (tend un écrin avec une bague).
 
 Pour `sit`, `y` est la hauteur de l'assise. Pour le faire marcher : anime `x` avec `pose: "run"`.
 
@@ -36,7 +43,7 @@ Mêmes props que `character` (`pose` par défaut `work`) + celles de `monitor` (
 Centre de l'écran ≈ (`x` + 318×scale, `y` − 261×scale) — pratique pour y poser un `icon` `check`.
 
 ### `crowd` — rangée de petits bonshommes
-`count` (10), `gap` (80), `size` (0.26), `alpha`. `y` = pieds.
+`count` (10), `gap` (80), `size` (0.26), `alpha`, `pose`, `marks` (ex. `shock` pour une foule choquée). `y` = pieds.
 
 ## Décor
 
@@ -46,6 +53,7 @@ Centre de l'écran ≈ (`x` + 318×scale, `y` − 261×scale) — pratique pour 
 | `spotlight` | `x`, `y` (sol), `width` (440), `topWidth` (110), `power` (1) | cône de lumière venant du haut ; à placer avant le personnage |
 | `desk` | `x` (bord gauche), `y` (sol), `w` (430), `h` (150) | |
 | `window` | `w`, `h` (200), `moon` | fenêtre avec lune = nuit, travail tardif |
+| `arch` | `x`,`y` (centre au sol), `w` (760), `h` (980) | arche fleurie (mariage, cérémonie) |
 | `rings` | `count` (3), `maxR` (320), `period` (2.4), `static` | ondes concentriques derrière un mot ou un personnage |
 
 ## Texte et chiffres
@@ -90,7 +98,7 @@ L'image est recadrée pour remplir le cadre (cover). Formats : png, jpg, webp, g
 
 ### `icon`
 `name` : `lock`, `unlock`, `warning`, `check`, `cross`, `clock` (aiguilles animées, `speed`), `briefcase`,
-`play`, `dollar`, `search`, `battery` (`level` 0–1), `people`, `city`, `arrow`, `heart`, `star`, `bulb`.
+`play`, `dollar`, `search`, `battery` (`level` 0–1), `people`, `city`, `arrow`, `heart`, `star`, `bulb`, `ring` (bague), `flower`.
 `size` (140), `label` (texte dessous), `glow`.
 
 ### `card` — carte encadrée
@@ -105,6 +113,9 @@ L'image est recadrée pour remplir le cadre (cover). Formats : png, jpg, webp, g
 
 ### `trafficlight`
 `active` (0 haut, 1 milieu, 2 bas = feu « vert » blanc brillant), `pole`.
+
+### `timer` — chronomètre à rebours
+`from` (5), `start` (s), `r` (150). Le chiffre descend d'une unité par seconde jusqu'à 0. Idéal pour un « choisis A ou B ».
 
 ### `line` / `shape`
 - `line` : `points: [[x,y],…]` (relatifs à `x`,`y`), `progress` (tracé), `width`, `dash`.

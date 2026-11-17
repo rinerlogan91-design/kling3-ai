@@ -623,7 +623,7 @@
     for (let k = 0; k < 6; k++) {
       const g = document.createElement('canvas'); g.width = g.height = 512;
       const gc = g.getContext('2d'), d = gc.createImageData(512, 512);
-      for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 26; }
+      for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 20; }
       gc.putImageData(d, 0, 0); grainTiles.push(g);
     }
     dotsTile = document.createElement('canvas'); dotsTile.width = W; dotsTile.height = H;

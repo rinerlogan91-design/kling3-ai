@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Rendu d'un fichier scène JSON en MP4 (style "bonhomme blanc").
  *
- *   node render.js scene.json -o sortie.mp4 [--audio musique.mp3] [--scale 0.5]
+ *   node render.js scene.json -o sortie.mp4 [--audio musique.mp3] [--scale 0.5] [--crf 22]
  *                  [--sheet planche.jpg] [--still 3.5 image.png] [--from 10 --to 20]
  *
  * Prérequis : node, playwright (+ chromium), ffmpeg.                         */
@@ -64,7 +64,7 @@ function loadPlaywright() {
   const audio = opt('--audio') || (scene.audio ? path.resolve(path.dirname(scenePath), scene.audio) : null);
   const ff = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-framerate', String(info.fps), '-i', '-'];
   if (audio) ff.push('-i', audio, '-c:a', 'aac', '-b:a', '192k', '-shortest');
-  ff.push('-vf', `scale=${ow}:${oh}:flags=lanczos`, '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out);
+  ff.push('-vf', `scale=${ow}:${oh}:flags=lanczos`, '-c:v', 'libx264', '-preset', 'medium', '-crf', opt('--crf') || '22', '-maxrate', '6M', '-bufsize', '12M', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out);
   const proc = spawn('ffmpeg', ff, { stdio: ['pipe', 'inherit', 'inherit'] });
   const done = new Promise((res, rej) => proc.on('close', c => (c === 0 ? res() : rej(new Error('ffmpeg a échoué (code ' + c + ')')))));
   proc.stdin.on('error', () => {});

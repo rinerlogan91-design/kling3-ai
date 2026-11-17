@@ -1,0 +1,84 @@
+{
+  "format": "16:9",
+  "fps": 30,
+  "scenes": [
+    {
+      "duration": 2.4,
+      "elements": [
+        { "type": "rings", "x": 960, "y": 540, "maxR": 460, "count": 3 },
+        { "type": "text", "text": "STOP.", "size": 210, "in": "slam", "at": 0.1, "until": 1.15, "out": "blur" },
+        { "type": "text", "text": "WAITING.", "size": 210, "in": "slam", "at": 1.2 }
+      ]
+    },
+    {
+      "duration": 5,
+      "transition": "flash",
+      "elements": [
+        { "type": "caption", "text": "You keep waiting until...", "x": 960, "y": 200, "in": "type" },
+        { "type": "progress", "x": 960, "y": 420, "w": 900, "label": "You're ready", "tag": "STUCK", "value": [[0.4, 0], [2.2, 0.99, "out"]], "at": 0.3, "in": "up" },
+        { "type": "progress", "x": 960, "y": 560, "w": 900, "label": "Enough money", "tag": "STUCK", "value": [[1.2, 0], [3.0, 0.99, "out"]], "at": 1.1, "in": "up" },
+        { "type": "progress", "x": 960, "y": 700, "w": 900, "label": "The timing is perfect", "tag": "STUCK", "value": [[2.0, 0], [3.8, 0.99, "out"]], "at": 1.9, "in": "up" },
+        { "type": "icon", "name": "lock", "x": 960, "y": 560, "size": 300, "at": 4.0, "in": "slam" },
+        { "type": "text", "text": "BRO.", "size": 60, "x": 960, "y": 900, "at": 4.1, "in": "pop" }
+      ]
+    },
+    {
+      "duration": 6,
+      "transition": "fade",
+      "camera": { "zoom": [[0, 1.0], [6, 1.08, "linear"]], "x": 900, "y": 560 },
+      "elements": [
+        { "type": "spotlight", "x": 420, "y": 820 },
+        { "type": "ground", "y": 820 },
+        { "type": "window", "x": 170, "y": 190 },
+        { "type": "workstation", "x": 420, "y": 820, "scale": 1.5 },
+        { "type": "counter", "x": 1500, "y": 300, "label": "Days", "from": 1, "to": 600, "start": 0.5, "dur": 4.5, "ease": "in", "size": 130 },
+        { "type": "tiles", "x": 1500, "y": 480, "count": 7, "text": "$0", "progress": [[1, 0], [5, 7, "linear"]] },
+        { "type": "caption", "text": "Not working", "x": 1500, "y": 590, "size": 22, "at": 5.0, "in": "pop" }
+      ]
+    },
+    {
+      "duration": 6,
+      "transition": "flash",
+      "elements": [
+        { "type": "spotlight", "x": 380, "y": 860 },
+        { "type": "ground", "y": 860 },
+        { "type": "workstation", "x": 380, "y": 860, "scale": 1.4, "pose": [[0, "work"], [3.2, "cheer"]], "glow": [[3.0, 0.6], [3.4, 1.2]] },
+        { "type": "icon", "name": "check", "x": 825, "y": 440, "size": 110, "at": 3.2, "in": "pop" },
+        { "type": "money", "mode": "rain", "x": 1000, "y": 0, "w": 900, "h": 860, "count": 60, "intensity": [[0.3, 0], [3.5, 1, "in"]] },
+        { "type": "money", "mode": "pile", "x": 1420, "y": 860, "rows": 9, "progress": [[0.5, 0], [4.5, 1, "in"]] },
+        { "type": "counter", "x": 960, "y": 170, "label": "Net worth", "prefix": "$", "from": 398, "to": 1009400, "start": 0.3, "dur": 4.4, "ease": "inExpo", "size": 130 }
+      ]
+    },
+    {
+      "duration": 6,
+      "transition": "flash",
+      "elements": [
+        { "type": "caption", "text": "They kept going", "x": 960, "y": 170, "size": 54, "in": "slam", "at": 0.2 },
+        { "type": "caption", "text": "Until the same people started asking", "x": 960, "y": 240, "size": 24, "at": 2.6, "in": "up" },
+        { "type": "stairs", "x": 500, "y": 880, "steps": 7, "stepW": 120, "stepH": 70, "progress": [[0.2, 0], [1.6, 1, "out"]], "climber": [[1.2, 0], [5.4, 7, "linear"]] },
+        { "type": "crowd", "x": 700, "y": 980, "count": 10, "gap": 90, "alpha": 0.55 },
+        { "type": "bubble", "text": "LOL", "x": 380, "y": 560, "at": 0.8, "until": 3.2, "in": "pop" },
+        { "type": "bubble", "text": "LOSER", "x": 1500, "y": 620, "tail": "right", "at": 1.3, "until": 3.2, "in": "pop" },
+        { "type": "bubble", "text": "HOW?", "x": 1560, "y": 440, "tail": "right", "at": 4.2, "in": "pop" }
+      ]
+    },
+    {
+      "duration": 6.5,
+      "transition": "fade",
+      "elements": [
+        { "type": "chart", "x": 560, "y": 900, "w": 900, "h": 620, "saw": [[0.3, 0], [2.6, 1, "linear"]], "curve": [[2.4, 0], [5.6, 1, "inOut"]] },
+        { "type": "counter", "x": 800, "y": 380, "label": "Net worth", "prefix": "$", "from": 0, "to": 976359, "start": 2.4, "dur": 3.2, "ease": "inExpo", "size": 80 },
+        { "type": "text", "text": "OBSESS OVER THE WORK.", "x": 960, "y": 140, "size": 64, "at": 4.6, "in": "slam" }
+      ]
+    },
+    {
+      "duration": 3.5,
+      "transition": "flash",
+      "elements": [
+        { "type": "icon", "name": "warning", "x": 960, "y": 330, "size": 180, "in": "pop", "at": 0.1 },
+        { "type": "text", "text": "TAKE THE RISK.", "size": 150, "x": 960, "y": 620, "in": "slam", "at": 0.5 },
+        { "type": "character", "x": 960, "y": 980, "scale": 0.6, "pose": "run", "ring": false, "at": 1.2, "in": "fade" }
+      ]
+    }
+  ]
+}

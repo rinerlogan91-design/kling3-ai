@@ -21,7 +21,8 @@ dans Chromium et `scripts/render.js` l'encode avec ffmpeg. Tout est déterminist
 2. **Écris le découpage** : une ligne par scène (durée, phrase à l'écran, métaphore visuelle). Une image
    de l'utilisateur = en général une scène. Suis la structure narrative ci-dessous.
 3. **Écris `scene.json`** dans le dossier de travail (ex. `videos/<nom>/scene.json`, images copiées à côté).
-   Référence complète des éléments : `reference/elements.md`. Exemple complet : `examples/demo.json`.
+   Référence complète des éléments : `reference/elements.md`. Exemples complets : `examples/demo.json`
+   (16:9, business) et `examples/mariage.json` (9:16, histoire à personnages + quiz « A ou B » avec chrono).
 4. **Vérifie avant le rendu complet** — une image fixe par scène, que tu regardes avec Read :
    `node <skill>/scripts/render.js scene.json --still 12.5 /chemin/scratch/s.jpg`
    Corrige chevauchements, textes coupés, éléments hors cadre.
@@ -117,4 +118,8 @@ Le bonhomme mesure environ 230 × `scale` px de haut et 140 × `scale` de large 
 - Deux éléments au même endroit au même moment : utilise `until` sur le premier et `at` sur le second.
 - Un type inconnu est ignoré (le script l'affiche en avertissement) : n'invente pas de types, compose avec
   `shape`, `line`, `icon`, `text`.
+- Les dessins de l'utilisateur ont souvent des visages et de la couleur : ne les reproduis pas. L'émotion passe
+  par la pose, `marks`, `shake` et les bulles ; un « A vert / B rouge » devient deux cadres blancs.
+- S'il manque un objet (ex. arche, chrono), ajoute-le proprement au moteur (`engine/engine.js`, table `DRAW`)
+  et documente-le dans `reference/elements.md`, plutôt que de bricoler.
 - N'ajoute pas de couleur, d'emoji ni de dégradé coloré : cela casse immédiatement le style.

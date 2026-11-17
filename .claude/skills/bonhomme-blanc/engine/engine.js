@@ -6,7 +6,7 @@
   const FONT = '"Inter Display", Inter, "Helvetica Neue", Arial, sans-serif';
   const TAU = Math.PI * 2;
   let W = 1920, H = 1080, FPS = 30, SCENE = null, TOTAL = 0;
-  let main, mc, layer, lc, small, sc2, small2, sc3, grainTiles = [], dotsTile = null;
+  let main, mc, layer, lc, small, sc2, small2, sc3, tiny, tc, grainTiles = [], dotsTile = null, FILTER_OK = true;
   const IMAGES = {};
 
   /* ---------- utilitaires ---------- */
@@ -676,6 +676,15 @@
     if (bloom > 0) {
       mc.globalCompositeOperation = 'lighter';
       const bw = small.width, bh = small.height;
+      if (!FILTER_OK) {
+        /* Navigateurs sans ctx.filter (Safari) : flou par réduction/agrandissement. */
+        tc.globalCompositeOperation = 'copy'; tc.drawImage(layer, 0, 0, tiny.width, tiny.height);
+        mc.imageSmoothingQuality = 'high';
+        mc.globalAlpha = 0.4 * bloom; mc.drawImage(tiny, 0, 0, W, H);
+        sc2.globalCompositeOperation = 'copy'; sc2.drawImage(layer, 0, 0, bw, bh);
+        mc.globalAlpha = 0.18 * bloom; mc.drawImage(small, 0, 0, W, H);
+        mc.globalCompositeOperation = 'source-over';
+      } else {
       sc2.globalCompositeOperation = 'copy'; sc2.filter = 'none'; sc2.drawImage(layer, 0, 0, bw, bh);
       sc3.globalCompositeOperation = 'copy'; sc3.filter = `blur(${(bw / 110).toFixed(1)}px)`; sc3.drawImage(small, 0, 0);
       mc.imageSmoothingQuality = 'high';
@@ -683,6 +692,7 @@
       sc3.filter = `blur(${(bw / 30).toFixed(1)}px)`; sc3.drawImage(small, 0, 0);
       mc.globalAlpha = 0.15 * bloom; mc.drawImage(small2, 0, 0, W, H);
       mc.globalCompositeOperation = 'source-over';
+      }
     }
     mc.globalAlpha = 1; mc.drawImage(layer, 0, 0);
     const r = rng(99); mc.fillStyle = '#fff';
@@ -715,6 +725,8 @@
     layer = document.createElement('canvas'); layer.width = W; layer.height = H; lc = layer.getContext('2d');
     small = document.createElement('canvas'); small.width = Math.round(W / 4); small.height = Math.round(H / 4); sc2 = small.getContext('2d');
     small2 = document.createElement('canvas'); small2.width = small.width; small2.height = small.height; sc3 = small2.getContext('2d');
+    tiny = document.createElement('canvas'); tiny.width = Math.round(W / 24); tiny.height = Math.round(H / 24); tc = tiny.getContext('2d');
+    try { const probe = document.createElement('canvas').getContext('2d'); probe.filter = 'blur(2px)'; FILTER_OK = probe.filter === 'blur(2px)'; } catch (e) { FILTER_OK = false; }
     TOTAL = scene.scenes.reduce((a, s) => a + s.duration, 0);
     const r = rng(1234); grainTiles = [];
     for (let k = 0; k < 6; k++) {

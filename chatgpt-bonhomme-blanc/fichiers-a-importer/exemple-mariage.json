@@ -1,0 +1,663 @@
+{
+ "format": "9:16",
+ "fps": 30,
+ "scenes": [
+  {
+   "duration": 2.8,
+   "elements": [
+    {
+     "type": "rings",
+     "x": 540,
+     "y": 900,
+     "maxR": 520
+    },
+    {
+     "type": "icon",
+     "name": "ring",
+     "x": 540,
+     "y": 560,
+     "size": 200,
+     "in": "pop",
+     "at": 0.1
+    },
+    {
+     "type": "text",
+     "text": "LE JOUR\nDU MARIAGE.",
+     "size": 118,
+     "x": 540,
+     "y": 940,
+     "in": "slam",
+     "at": 0.2,
+     "until": 1.55,
+     "out": "blur"
+    },
+    {
+     "type": "text",
+     "text": "MAIS...",
+     "size": 170,
+     "x": 540,
+     "y": 940,
+     "in": "slam",
+     "at": 1.6
+    }
+   ]
+  },
+  {
+   "duration": 5.5,
+   "transition": "flash",
+   "elements": [
+    {
+     "type": "arch",
+     "x": 540,
+     "y": 1300,
+     "w": 860,
+     "h": 1020
+    },
+    {
+     "type": "spotlight",
+     "x": 540,
+     "y": 1300,
+     "width": 900,
+     "topWidth": 260,
+     "power": 0.7
+    },
+    {
+     "type": "ground",
+     "y": 1300
+    },
+    {
+     "type": "character",
+     "x": 540,
+     "y": 1240,
+     "scale": 1.0,
+     "book": true,
+     "glow": 0.2,
+     "ring": false,
+     "alpha": 0.8
+    },
+    {
+     "type": "character",
+     "x": 240,
+     "y": 1300,
+     "scale": 1.5,
+     "bowtie": true,
+     "marks": "joy",
+     "pose": [
+      [
+       0,
+       "stand"
+      ],
+      [
+       3.0,
+       "cheer"
+      ]
+     ]
+    },
+    {
+     "type": "character",
+     "x": 840,
+     "y": 1300,
+     "scale": 1.5,
+     "dress": true,
+     "facing": -1,
+     "pose": [
+      [
+       0,
+       "stand"
+      ],
+      [
+       1.6,
+       "worry"
+      ]
+     ],
+     "marks": [
+      [
+       0,
+       ""
+      ],
+      [
+       1.6,
+       "sweat"
+      ]
+     ],
+     "shake": [
+      [
+       1.5,
+       0
+      ],
+      [
+       2.2,
+       2.5
+      ]
+     ]
+    },
+    {
+     "type": "bubble",
+     "text": "Voulez-vous l'épouser ?",
+     "x": 540,
+     "y": 800,
+     "size": 30,
+     "at": 0.7,
+     "until": 3.0,
+     "in": "pop"
+    },
+    {
+     "type": "bubble",
+     "text": "Oui !",
+     "x": 250,
+     "y": 660,
+     "size": 40,
+     "at": 3.0,
+     "in": "pop"
+    },
+    {
+     "type": "bubble",
+     "text": "...",
+     "x": 830,
+     "y": 700,
+     "size": 40,
+     "tail": "right",
+     "at": 4.0,
+     "in": "pop"
+    },
+    {
+     "type": "crowd",
+     "x": 540,
+     "y": 1560,
+     "count": 6,
+     "gap": 170,
+     "size": 0.5,
+     "alpha": 0.45
+    },
+    {
+     "type": "crowd",
+     "x": 540,
+     "y": 1790,
+     "count": 5,
+     "gap": 220,
+     "size": 0.65,
+     "alpha": 0.3
+    }
+   ]
+  },
+  {
+   "duration": 5.5,
+   "transition": "flash",
+   "camera": {
+    "zoom": [
+     [
+      0,
+      1.0
+     ],
+     [
+      5.5,
+      1.14,
+      "linear"
+     ]
+    ],
+    "x": 540,
+    "y": 1000
+   },
+   "elements": [
+    {
+     "type": "ground",
+     "y": 1300
+    },
+    {
+     "type": "rings",
+     "x": 540,
+     "y": 700,
+     "maxR": 330,
+     "at": 0.5
+    },
+    {
+     "type": "icon",
+     "name": "ring",
+     "x": 540,
+     "y": 700,
+     "size": 230,
+     "at": 0.5,
+     "in": "pop",
+     "glow": 2
+    },
+    {
+     "type": "character",
+     "x": 270,
+     "y": 1300,
+     "scale": 1.7,
+     "bowtie": true,
+     "pose": "give",
+     "marks": "joy",
+     "glow": 1
+    },
+    {
+     "type": "character",
+     "x": 810,
+     "y": 1300,
+     "scale": 1.7,
+     "dress": true,
+     "facing": -1,
+     "marks": "scribble",
+     "shake": [
+      [
+       0.5,
+       1
+      ],
+      [
+       4.5,
+       4
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "text": "IL EST SÛR.",
+     "size": 100,
+     "x": 540,
+     "y": 330,
+     "in": "slam",
+     "at": 0.2,
+     "until": 2.3,
+     "out": "blur"
+    },
+    {
+     "type": "text",
+     "text": "ELLE HÉSITE.",
+     "size": 100,
+     "x": 540,
+     "y": 330,
+     "in": "slam",
+     "at": 2.4
+    },
+    {
+     "type": "progress",
+     "x": 540,
+     "y": 1500,
+     "w": 760,
+     "h": 34,
+     "label": "Doute",
+     "value": [
+      [
+       1.0,
+       0
+      ],
+      [
+       4.6,
+       0.99,
+       "out"
+      ]
+     ],
+     "at": 0.9,
+     "in": "up"
+    }
+   ]
+  },
+  {
+   "duration": 5,
+   "transition": "flash",
+   "elements": [
+    {
+     "type": "caption",
+     "text": "Tout le monde\nretient son souffle",
+     "size": 46,
+     "x": 540,
+     "y": 190,
+     "in": "type"
+    },
+    {
+     "type": "arch",
+     "x": 540,
+     "y": 1060,
+     "w": 640,
+     "h": 700
+    },
+    {
+     "type": "spotlight",
+     "x": 640,
+     "y": 1060,
+     "width": 360,
+     "power": 1.1
+    },
+    {
+     "type": "ground",
+     "y": 1060
+    },
+    {
+     "type": "character",
+     "x": 500,
+     "y": 1030,
+     "scale": 0.75,
+     "book": true,
+     "glow": 0.2,
+     "ring": false,
+     "alpha": 0.75
+    },
+    {
+     "type": "character",
+     "x": 360,
+     "y": 1060,
+     "scale": 1.05,
+     "bowtie": true,
+     "marks": "shock",
+     "glow": 0.4
+    },
+    {
+     "type": "character",
+     "x": 660,
+     "y": 1060,
+     "scale": 1.05,
+     "dress": true,
+     "facing": -1,
+     "pose": "worry",
+     "marks": "sweat",
+     "shake": 2
+    },
+    {
+     "type": "crowd",
+     "x": 540,
+     "y": 1320,
+     "count": 4,
+     "gap": 250,
+     "size": 0.7,
+     "alpha": 0.45,
+     "marks": "shock"
+    },
+    {
+     "type": "crowd",
+     "x": 540,
+     "y": 1560,
+     "count": 4,
+     "gap": 270,
+     "size": 0.85,
+     "alpha": 0.6,
+     "marks": "shock"
+    },
+    {
+     "type": "crowd",
+     "x": 540,
+     "y": 1830,
+     "count": 3,
+     "gap": 360,
+     "size": 1.0,
+     "alpha": 0.75,
+     "marks": "shock"
+    },
+    {
+     "type": "bubble",
+     "text": "Quoi ?",
+     "x": 170,
+     "y": 1090,
+     "size": 30,
+     "at": 1.4,
+     "in": "pop"
+    },
+    {
+     "type": "bubble",
+     "text": "Oh non...",
+     "x": 900,
+     "y": 1300,
+     "size": 30,
+     "tail": "right",
+     "at": 2.4,
+     "in": "pop"
+    },
+    {
+     "type": "bubble",
+     "text": "?!",
+     "x": 250,
+     "y": 1560,
+     "size": 34,
+     "at": 3.2,
+     "in": "pop"
+    }
+   ]
+  },
+  {
+   "duration": 4.5,
+   "transition": "fade",
+   "elements": [
+    {
+     "type": "arch",
+     "x": 540,
+     "y": 1320,
+     "w": 860,
+     "h": 1020
+    },
+    {
+     "type": "spotlight",
+     "x": 810,
+     "y": 1320,
+     "width": 460
+    },
+    {
+     "type": "ground",
+     "y": 1320
+    },
+    {
+     "type": "character",
+     "x": 545,
+     "y": 1250,
+     "scale": 0.8,
+     "book": true,
+     "glow": 0.2,
+     "ring": false,
+     "alpha": 0.75,
+     "marks": "shock"
+    },
+    {
+     "type": "character",
+     "x": 215,
+     "y": 1320,
+     "scale": 1.5,
+     "bowtie": true,
+     "pose": "give",
+     "marks": "joy"
+    },
+    {
+     "type": "character",
+     "x": 810,
+     "y": 1320,
+     "scale": 1.5,
+     "dress": true,
+     "facing": -1,
+     "pose": "worry",
+     "marks": "sweat",
+     "shake": 3,
+     "glow": 1
+    },
+    {
+     "type": "text",
+     "text": "OUI",
+     "size": 150,
+     "x": 300,
+     "y": 1560,
+     "in": "slam",
+     "at": 1.0
+    },
+    {
+     "type": "caption",
+     "text": "ou",
+     "size": 50,
+     "x": 540,
+     "y": 1560,
+     "at": 1.7,
+     "in": "pop"
+    },
+    {
+     "type": "text",
+     "text": "NON",
+     "size": 150,
+     "x": 790,
+     "y": 1560,
+     "in": "slam",
+     "at": 2.3
+    },
+    {
+     "type": "text",
+     "text": "?",
+     "size": 200,
+     "x": 540,
+     "y": 1760,
+     "in": "slam",
+     "at": 3.2
+    }
+   ]
+  },
+  {
+   "duration": 8,
+   "transition": "flash",
+   "camera": {
+    "zoom": [
+     [
+      0,
+      1.0
+     ],
+     [
+      8,
+      1.03,
+      "linear"
+     ]
+    ]
+   },
+   "elements": [
+    {
+     "type": "caption",
+     "text": "Fais ton choix",
+     "size": 56,
+     "x": 540,
+     "y": 230,
+     "in": "slam",
+     "at": 0.2
+    },
+    {
+     "type": "shape",
+     "x": 280,
+     "y": 760,
+     "w": 470,
+     "h": 820,
+     "r": 40,
+     "fill": "#070707",
+     "at": 0.4,
+     "in": "up"
+    },
+    {
+     "type": "shape",
+     "x": 800,
+     "y": 760,
+     "w": 470,
+     "h": 820,
+     "r": 40,
+     "fill": "#070707",
+     "at": 0.7,
+     "in": "up"
+    },
+    {
+     "type": "text",
+     "text": "A",
+     "size": 190,
+     "x": 280,
+     "y": 500,
+     "at": 0.6,
+     "in": "slam"
+    },
+    {
+     "type": "text",
+     "text": "B",
+     "size": 190,
+     "x": 800,
+     "y": 500,
+     "at": 0.9,
+     "in": "slam"
+    },
+    {
+     "type": "character",
+     "x": 190,
+     "y": 1110,
+     "scale": 0.82,
+     "bowtie": true,
+     "pose": "give",
+     "marks": "joy",
+     "at": 0.8
+    },
+    {
+     "type": "character",
+     "x": 385,
+     "y": 1110,
+     "scale": 0.82,
+     "dress": true,
+     "facing": -1,
+     "marks": "joy",
+     "glow": 1,
+     "at": 0.8
+    },
+    {
+     "type": "caption",
+     "text": "Elle dit oui",
+     "size": 26,
+     "x": 280,
+     "y": 650,
+     "at": 1.2,
+     "in": "up"
+    },
+    {
+     "type": "character",
+     "x": 690,
+     "y": 1110,
+     "scale": 0.82,
+     "bowtie": true,
+     "pose": "worry",
+     "marks": "shock",
+     "glow": 0.3,
+     "at": 1.1
+    },
+    {
+     "type": "character",
+     "x": 905,
+     "y": 1110,
+     "scale": 0.82,
+     "dress": true,
+     "facing": -1,
+     "pose": "refuse",
+     "at": 1.1
+    },
+    {
+     "type": "caption",
+     "text": "Elle refuse",
+     "size": 26,
+     "x": 800,
+     "y": 650,
+     "at": 1.5,
+     "in": "up"
+    },
+    {
+     "type": "timer",
+     "x": 540,
+     "y": 1500,
+     "r": 170,
+     "from": 5,
+     "start": 2.0,
+     "at": 1.6,
+     "in": "pop"
+    },
+    {
+     "type": "rings",
+     "x": 540,
+     "y": 1500,
+     "maxR": 420,
+     "period": 1,
+     "count": 1,
+     "at": 2.0
+    },
+    {
+     "type": "text",
+     "text": "A OU B ?",
+     "size": 110,
+     "x": 540,
+     "y": 1790,
+     "in": "slam",
+     "at": 7.0
+    }
+   ]
+  }
+ ]
+}

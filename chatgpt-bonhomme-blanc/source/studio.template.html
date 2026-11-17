@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bonhomme Blanc Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.js"></script>
+<style>
+  :root { --bg: #000; --panel: #0d0d0d; --line: #262626; --text: #f2f2f2; --muted: #8a8a8a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Inter, system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  h1 { font-size: 15px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; margin: 0; }
+  #meta { color: var(--muted); font-size: 13px; }
+  .stage { background: #050505; border: 1px solid var(--line); border-radius: 12px; display: flex; justify-content: center; padding: 10px; }
+  canvas { display: block; max-width: 100%; max-height: 68vh; width: auto; height: auto; border-radius: 6px; }
+  .bar { display: flex; align-items: center; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+  button { font: inherit; font-weight: 700; border: 1px solid #3a3a3a; background: #161616; color: var(--text); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+  button:hover { border-color: #6a6a6a; }
+  button.primary { background: #fff; color: #000; border-color: #fff; }
+  button:disabled { opacity: .45; cursor: default; }
+  input[type=range] { flex: 1; min-width: 160px; accent-color: #fff; }
+  #time { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 92px; text-align: right; }
+  .progress { height: 6px; background: #1c1c1c; border-radius: 3px; overflow: hidden; flex: 1; min-width: 160px; display: none; }
+  .progress > div { height: 100%; width: 0; background: #fff; }
+  #status { color: var(--muted); font-size: 13px; min-height: 20px; }
+  details { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  summary { cursor: pointer; font-weight: 700; }
+  textarea { width: 100%; min-height: 220px; margin: 10px 0; background: #050505; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font: 12px/1.5 ui-monospace, Menlo, monospace; }
+  .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+  a { color: #fff; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Bonhomme blanc · Studio</h1>
+    <span id="meta">Aucun scénario chargé</span>
+  </header>
+
+  <div class="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+
+  <div class="bar">
+    <button id="play" disabled>▶ Lecture</button>
+    <input id="seek" type="range" min="0" max="1000" value="0" disabled>
+    <span id="time">0,0 / 0,0 s</span>
+  </div>
+  <div class="bar">
+    <button id="export" class="primary" disabled>Exporter en MP4</button>
+    <div class="progress" id="prog"><div></div></div>
+    <span id="status"></span>
+  </div>
+
+  <details id="paste">
+    <summary>Coller ou modifier un scénario (JSON)</summary>
+    <textarea id="json" spellcheck="false" placeholder='{ "format": "9:16", "scenes": [ ... ] }'></textarea>
+    <div class="bar">
+      <button id="load">Charger le scénario</button>
+      <label><button type="button" id="pick">Ajouter des images…</button><input id="files" type="file" accept="image/*" multiple hidden></label>
+    </div>
+    <p class="hint">Les images référencées dans <code>"images"</code> par leur nom de fichier (ex. <code>"photo1": "photo1.jpg"</code>) sont remplacées par les fichiers que vous ajoutez ici.</p>
+  </details>
+</main>
+
+<script id="scene-data" type="application/json">null</script>
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const canvas = $('c');
+  let scene = null, info = null, playing = false, t = 0, last = 0, busy = false;
+  const fmt = s => s.toFixed(1).replace('.', ',');
+
+  function status(msg) { $('status').textContent = msg || ''; }
+  function setTime(v) {
+    t = Math.max(0, Math.min(info ? info.duration : 0, v));
+    if (info) { window.BB.draw(t); $('seek').value = String(Math.round(t / info.duration * 1000)); $('time').textContent = `${fmt(t)} / ${fmt(info.duration)} s`; }
+  }
+  async function loadScene(obj) {
+    if (!obj || !Array.isArray(obj.scenes) || !obj.scenes.length) throw new Error('Le JSON doit contenir "scenes": [ ... ]');
+    scene = obj; playing = false; $('play').textContent = '▶ Lecture';
+    status('Chargement…');
+    info = await window.BB.load(JSON.parse(JSON.stringify(scene)), canvas);
+    const unknown = [...new Set(scene.scenes.flatMap(s => (s.elements || []).map(e => e.type)))].filter(x => !window.BB.types.includes(x));
+    $('meta').textContent = `${info.width}×${info.height} · ${fmt(info.duration)} s · ${scene.scenes.length} scènes`;
+    ['play', 'seek', 'export'].forEach(id => { $(id).disabled = false; });
+    $('json').value = JSON.stringify(scene, (k, v) => (typeof v === 'string' && v.startsWith('data:') ? v.slice(0, 40) + '…' : v), 2);
+    status(unknown.length ? 'Éléments inconnus ignorés : ' + unknown.join(', ') : 'Prêt. Lancez la lecture ou exportez la vidéo.');
+    setTime(0);
+  }
+
+  function loop(now) {
+    if (!playing) return;
+    t += (now - last) / 1000; last = now;
+    if (t >= info.duration) { t = info.duration; playing = false; $('play').textContent = '▶ Lecture'; }
+    setTime(t);
+    if (playing) requestAnimationFrame(loop);
+  }
+  $('play').onclick = () => {
+    if (!info || busy) return;
+    playing = !playing; $('play').textContent = playing ? '⏸ Pause' : '▶ Lecture';
+    if (playing) { if (t >= info.duration - 0.01) t = 0; last = performance.now(); requestAnimationFrame(loop); }
+  };
+  $('seek').oninput = e => { playing = false; $('play').textContent = '▶ Lecture'; setTime(e.target.value / 1000 * info.duration); };
+
+  function progress(k) { $('prog').style.display = 'block'; $('prog').firstElementChild.style.width = (k * 100).toFixed(1) + '%'; }
+  function download(blob, ext) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (scene.title || 'bonhomme-blanc').replace(/[^\w\-]+/g, '-').toLowerCase() + '.' + ext;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function pickCodec(w, h, fps) {
+    const tries = [
+      ['avc', 'avc1.640033'], ['avc', 'avc1.640028'], ['avc', 'avc1.4d0028'], ['avc', 'avc1.42002a'],
+      ['vp9', 'vp09.00.41.08'], ['vp9', 'vp09.00.40.08'],
+    ];
+    for (const [mux, codec] of tries) {
+      const cfg = { codec, width: w, height: h, bitrate: 8_000_000, framerate: fps };
+      if (mux === 'avc') cfg.avc = { format: 'avc' };
+      try { const r = await VideoEncoder.isConfigSupported(cfg); if (r.supported) return { mux, cfg }; } catch (e) { /* suivant */ }
+    }
+    return null;
+  }
+
+  async function exportWebCodecs() {
+    const { width: w, height: h, fps, frames } = info;
+    const pick = await pickCodec(w, h, fps);
+    if (!pick) return false;
+    const muxer = new Mp4Muxer.Muxer({ target: new Mp4Muxer.ArrayBufferTarget(), video: { codec: pick.mux, width: w, height: h, frameRate: fps }, fastStart: 'in-memory' });
+    let failure = null;
+    const enc = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failure = e; } });
+    enc.configure(pick.cfg);
+    const t0 = performance.now();
+    for (let i = 0; i < frames; i++) {
+      if (failure) throw failure;
+      window.BB.draw(i / fps);
+      const vf = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
+      enc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); vf.close();
+      while (enc.encodeQueueSize > 6) await sleep(2);
+      if (i % 6 === 0) {
+        progress(i / frames);
+        const left = (performance.now() - t0) / (i + 1) * (frames - i) / 1000;
+        status(`Encodage ${Math.round(i / frames * 100)} % · encore ~${Math.ceil(left)} s`);
+        await sleep(0);
+      }
+    }
+    await enc.flush(); enc.close(); muxer.finalize();
+    if (failure) throw failure;
+    download(new Blob([muxer.target.buffer], { type: 'video/mp4' }), 'mp4');
+    status(`Vidéo exportée (${pick.mux === 'avc' ? 'MP4 H.264' : 'MP4 VP9'}) en ${Math.round((performance.now() - t0) / 1000)} s. Regardez dans vos téléchargements.`);
+    return true;
+  }
+
+  async function exportRecorder() {
+    const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
+    const mime = types.find(x => window.MediaRecorder && MediaRecorder.isTypeSupported(x));
+    if (!mime) throw new Error("Ce navigateur ne sait pas enregistrer de vidéo. Utilisez Chrome, Edge ou Safari récent.");
+    status('Enregistrement en temps réel (gardez cet onglet au premier plan)…');
+    const stream = canvas.captureStream(info.fps), rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+    const parts = []; rec.ondataavailable = e => e.data.size && parts.push(e.data);
+    const done = new Promise(r => { rec.onstop = r; });
+    rec.start(250);
+    const start = performance.now();
+    await new Promise(res => {
+      const step = now => {
+        const tt = (now - start) / 1000;
+        window.BB.draw(Math.min(tt, info.duration)); progress(tt / info.duration);
+        if (tt < info.duration) requestAnimationFrame(step); else res();
+      };
+      requestAnimationFrame(step);
+    });
+    await sleep(200); rec.stop(); await done;
+    const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+    download(new Blob(parts, { type: mime.split(';')[0] }), ext);
+    status(`Vidéo exportée (${ext.toUpperCase()}). Regardez dans vos téléchargements.`);
+  }
+
+  $('export').onclick = async () => {
+    if (!info || busy) return;
+    busy = true; playing = false; $('play').textContent = '▶ Lecture';
+    ['play', 'seek', 'export', 'load'].forEach(id => { $(id).disabled = true; });
+    try {
+      const ok = window.VideoEncoder && window.Mp4Muxer ? await exportWebCodecs() : false;
+      if (!ok) await exportRecorder();
+    } catch (e) { console.error(e); status('Erreur : ' + (e.message || e)); }
+    busy = false; progress(1); setTimeout(() => { $('prog').style.display = 'none'; }, 1500);
+    ['play', 'seek', 'export', 'load'].forEach(id => { $(id).disabled = false; });
+    setTime(t);
+  };
+
+  $('load').onclick = async () => {
+    try {
+      const obj = JSON.parse($('json').value);
+      // garder les images déjà intégrées si le texte affiché a été tronqué
+      if (scene && scene.images && obj.images) for (const k in obj.images) if (String(obj.images[k]).endsWith('…') && scene.images[k]) obj.images[k] = scene.images[k];
+      await loadScene(obj);
+    } catch (e) { status('JSON invalide : ' + e.message); }
+  };
+  $('pick').onclick = () => $('files').click();
+  $('files').onchange = async e => {
+    let obj; try { obj = JSON.parse($('json').value); } catch (err) { status("Chargez d'abord un scénario valide."); return; }
+    if (scene && scene.images && obj.images) for (const k in obj.images) if (String(obj.images[k]).endsWith('…') && scene.images[k]) obj.images[k] = scene.images[k];
+    obj.images = obj.images || {};
+    let n = 0;
+    for (const f of e.target.files) {
+      const url = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(f); });
+      const key = Object.keys(obj.images).find(k => String(obj.images[k]).split('/').pop() === f.name) || f.name.replace(/\.[^.]+$/, '');
+      obj.images[key] = url; n++;
+    }
+    try { await loadScene(obj); status(`${n} image(s) ajoutée(s).`); } catch (err) { status(err.message); }
+  };
+
+  const embedded = JSON.parse(document.getElementById('scene-data').textContent || 'null');
+  const start = () => {
+    if (embedded) loadScene(embedded).catch(e => status('Erreur : ' + e.message));
+    else { $('paste').open = true; status('Collez le scénario JSON fourni par ChatGPT, puis « Charger le scénario ».'); }
+  };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(start); else start();
+})();
+</script>
+</body>
+</html>
